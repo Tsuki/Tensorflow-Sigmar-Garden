@@ -6,34 +6,20 @@ import itertools
 
 import sys
 from PIL import Image
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import numpy as np
 
+from Marble import Marble
 
-class Marble(Enum):
-    none = -1
-    Salt = 0
-    Air = 1
-    Fire = 2
-    Water = 3
-    Earth = 4
-    Vitae = 5
-    Mors = 6
-    Quintessence = 7
-    Quicksilver = 8
-    Lead = 9
-    Tin = 10
-    Iron = 11
-    Copper = 12
-    Silver = 13
-    Gold = 14
+# Parameters
+from State import State
+from utils import field_positions, pixels_to_scan, img_pos, edges_at
 
-    def symbol(self):
-        if self.value is self.none.value:
-            return "-"
-        if self.value in range(self.Quicksilver.value, self.Gold.value + 1):
-            return self.name[0].upper()
-        else:
-            return self.name[0].lower()
-
+learning_rate = 0.1
+num_steps = 1000
+batch_size = 128
+display_step = 100
 
 FIELD_X = 1052
 FIELD_DX = 66
@@ -44,74 +30,8 @@ FIELD_SIZE = 6
 SCAN_RADIUS = 17
 MARBLE_BY_SYMBOL = dict(zip([Marble.symbol(e) for e in Marble], [e.name for e in Marble]))
 
-
-class State:
-    # state = dict.fromkeys([e.name for e in Marble], ())
-    state = dict()
-
-    def __str__(self):
-        py = -1
-        for (x, y) in FIELD_POSITIONS:
-            if y != py:
-                if y > 0: sys.stdout.write('\n')
-                sys.stdout.write(" " * abs(y - FIELD_SIZE + 1))
-            sys.stdout.write(self.state.get((x, y), "-"))
-            sys.stdout.write(' ')
-            py = y
-        return ''
-
-
-def field_positions():
-    d = FIELD_SIZE - 1
-    result = []
-    for y in range(-d, d + 1):
-        for x in range(-d, d + 1):
-            if not abs(y - x) > d:
-                result.append((x + d, y + d))
-    return result
-
-
-def pixels_to_scan():
-    pxs = []
-    for dy in range(-SCAN_RADIUS + 1, SCAN_RADIUS):
-        for dx in range(-SCAN_RADIUS + 1, SCAN_RADIUS):
-            if (abs(dx) + abs(dy)) * 2 > SCAN_RADIUS * 3:
-                continue
-            if dy * 2 < -SCAN_RADIUS and dx * 5 < SCAN_RADIUS:
-                continue
-            else:
-                pxs.append((dx, dy))
-    return pxs
-
-
 FIELD_POSITIONS = field_positions()
 PIXELS_TO_SCAN = pixels_to_scan()
-
-
-def img_pos(x, y):
-    return FIELD_X + FIELD_DX * (x * 2 - y) / 2, FIELD_Y + FIELD_DY * y
-
-
-def lightness_at(img, x, y):
-    _min, _max = img.getpixel((x, y))
-    return _min / _max
-
-
-def edges_at(img, x, y):
-    def sorting(d):
-        dx, dy = d
-
-        def neigh(dd):
-            ddx, ddy = dd
-            return lightness_at(img, x + dx + ddx, y + dy + ddy)
-
-        _neigh = list(map(neigh, [(-1, 0), (0, -1), (1, 0), (0, 1)]))
-        _max, _min = max(_neigh), min(_neigh)
-        return -(_max - _min)
-
-    result = sorted(PIXELS_TO_SCAN, key=sorting)
-    return result[:int(len(result) / 4)]
-
 
 TRAIN_CASES = dict.fromkeys([e.name for e in Marble], [])
 
@@ -128,10 +48,10 @@ def sample():
 
 
 def train():
-        marble = random.choice([e.name for e in Marble])
-        edge_pixels = random.choice(TRAIN_CASES[marble])
-        a = list(map(lambda x: 1.0 if x in edge_pixels else 0.0, PIXELS_TO_SCAN))
-        b = list(map(lambda x: 1.0 if marble is x else 0.0, [e.name for e in Marble]))
+    marble = random.choice([e.name for e in Marble])
+    edge_pixels = random.choice(TRAIN_CASES[marble])
+    a = list(map(lambda x: 1.0 if x in edge_pixels else 0.0, PIXELS_TO_SCAN))
+    b = list(map(lambda x: 1.0 if marble is x else 0.0, [e.name for e in Marble]))
 
 
 def initMap(img):
