@@ -117,29 +117,32 @@ def init():
         # print(image)
         input_fn = tf.estimator.inputs.numpy_input_fn(
             x={'images': np.array(image)}, y=np.array(label), batch_size=batch_size, num_epochs=None, shuffle=True)
+        print("Estimator")
         model = tf.estimator.Estimator(model_fn)
+        print("train")
         model.train(input_fn, steps=num_steps)
         # Use the Estimator 'evaluate' method
         model.evaluate(input_fn)
 
-        # n_images = 4
-        # # Get images from test set
-        # test_images = mnist.test.images[:n_images]
-        # # Prepare the input data
-        # input_fn = tf.estimator.inputs.numpy_input_fn(
-        #     x={'images': test_images}, shuffle=False)
-        # # Use the model to predict the images class
-        # preds = list(model.predict(input_fn))
-        #
-        # # Display
-        # for i in range(n_images):
-        #     plt.imshow(np.reshape(test_images[i], [28, 28]), cmap='gray')
-        #     plt.show()
-        #     print("Model prediction:", preds[i])
+        n_images = 4
+        # Get images from test set
+        test_images = mnist.test.images[:n_images]
+        # Prepare the input data
+        input_fn = tf.estimator.inputs.numpy_input_fn(
+            x={'images': test_images}, shuffle=False)
+        # Use the model to predict the images class
+        preds = list(model.predict(input_fn))
+
+        # Display
+        for i in range(n_images):
+            plt.imshow(np.reshape(test_images[i], [28, 28]), cmap='gray')
+            plt.show()
+            print("Model prediction:", preds[i])
 
 
 def main():
     # print(Marble.symbol(Marble.Fire))
+    tf.logging.set_verbosity(tf.logging.INFO)
     init()
     init_image(Image.open(os.path.join("sample", "1.png")).convert('LA'))
     # print(pixels_to_scan())

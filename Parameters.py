@@ -1,6 +1,6 @@
 
 learning_rate = 0.01
-num_steps = 1000
+num_steps = 2000
 batch_size = 100
 display_step = 100
 
