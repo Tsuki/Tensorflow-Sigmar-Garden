@@ -26,6 +26,8 @@ MARBLE_BY_SYMBOL = dict(zip([Marble.symbol(e) for e in Marble], [e.name for e in
 TRAIN_CASES = dict.fromkeys([e.name for e in Marble], [])
 image = []
 label = []
+X = tf.placeholder("float", [None, num_input])
+Y = tf.placeholder("string", [None, num_classes])
 
 
 def sample():
@@ -35,7 +37,7 @@ def sample():
             [lines.split() for lines in open(os.path.join("sample", str(i) + ".txt"), "r").readlines()]))
         for j, (pos, symbol) in enumerate(zip(FIELD_POSITIONS, samples)):
             marble = MARBLE_BY_SYMBOL[symbol]
-            edge_pixels = set(edges_at(img, *img_pos(*pos)))
+            edge_pixels = edges_at(img, *img_pos(*pos))
             image.append(edge_pixels)
             label.append(marble)
             # TRAIN_CASES[marble] = TRAIN_CASES[marble] + [edge_pixels]
@@ -50,6 +52,7 @@ def train():
 
 def init_image(img):
     status = State()
+    print(image[0])
     for pos in FIELD_POSITIONS:
         try_edges = edges_at(img, *img_pos(*pos))
         # result = ANN.run(list(map(lambda x: 1.0 if x in try_edges else 0.0, PIXELS_TO_SCAN)))
@@ -65,8 +68,8 @@ def init():
     else:
         print("Train Network")
         sample()
-        print(image)
-        print(label)
+        # print(image)
+        # print(label)
         input_fn = tf.estimator.inputs.numpy_input_fn(
             x={'images': image}, y=label, batch_size=batch_size, num_epochs=None, shuffle=True)
         # ANN.create_standard_array(layer)
