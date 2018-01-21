@@ -1,4 +1,4 @@
-from main import FIELD_SIZE, SCAN_RADIUS, FIELD_X, FIELD_DX, PIXELS_TO_SCAN, FIELD_DY, FIELD_Y
+from Parameters import FIELD_SIZE, SCAN_RADIUS, FIELD_X, FIELD_DX, FIELD_DY, FIELD_Y
 
 
 def field_positions():
@@ -22,6 +22,10 @@ def pixels_to_scan():
             else:
                 pxs.append((dx, dy))
     return pxs
+
+
+FIELD_POSITIONS = field_positions()
+PIXELS_TO_SCAN = pixels_to_scan()
 
 
 def img_pos(x, y):

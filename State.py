@@ -1,6 +1,7 @@
 import sys
 
-from main import FIELD_POSITIONS, FIELD_SIZE
+from Parameters import FIELD_SIZE
+from utils import FIELD_POSITIONS
 
 
 class State:

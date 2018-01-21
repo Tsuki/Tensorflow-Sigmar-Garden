@@ -12,26 +12,10 @@ import numpy as np
 
 from Marble import Marble
 
-# Parameters
 from State import State
-from utils import field_positions, pixels_to_scan, img_pos, edges_at
+from utils import img_pos, edges_at, PIXELS_TO_SCAN, FIELD_POSITIONS
 
-learning_rate = 0.1
-num_steps = 1000
-batch_size = 128
-display_step = 100
-
-FIELD_X = 1052
-FIELD_DX = 66
-FIELD_Y = 221
-FIELD_DY = 57
-FIELD_SIZE = 6
-
-SCAN_RADIUS = 17
 MARBLE_BY_SYMBOL = dict(zip([Marble.symbol(e) for e in Marble], [e.name for e in Marble]))
-
-FIELD_POSITIONS = field_positions()
-PIXELS_TO_SCAN = pixels_to_scan()
 
 TRAIN_CASES = dict.fromkeys([e.name for e in Marble], [])
 
@@ -54,7 +38,7 @@ def train():
     b = list(map(lambda x: 1.0 if marble is x else 0.0, [e.name for e in Marble]))
 
 
-def initMap(img):
+def init_image(img):
     status = State()
     for pos in FIELD_POSITIONS:
         try_edges = edges_at(img, *img_pos(*pos))
@@ -83,7 +67,7 @@ def init():
 def main():
     # print(Marble.symbol(Marble.Fire))
     init()
-    initMap(Image.open(os.path.join("sample", "1.png")).convert('LA'))
+    init_image(Image.open(os.path.join("sample", "1.png")).convert('LA'))
     # print(pixels_to_scan())
     # print(field_positions())
     # print(img_pos(1, 1))
