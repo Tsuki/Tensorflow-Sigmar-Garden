@@ -15,8 +15,11 @@ from Marble import Marble
 from State import State
 from utils import img_pos, edges_at, PIXELS_TO_SCAN, FIELD_POSITIONS
 
+n_hidden_1 = int(len(PIXELS_TO_SCAN) / 2) # 1st layer number of neurons
+n_hidden_2 = int(len(PIXELS_TO_SCAN) / 4) # 2nd layer number of neurons
+num_input = len(PIXELS_TO_SCAN) # MNIST data input (img shape: 28*28)
+num_classes = len(Marble)
 MARBLE_BY_SYMBOL = dict(zip([Marble.symbol(e) for e in Marble], [e.name for e in Marble]))
-
 TRAIN_CASES = dict.fromkeys([e.name for e in Marble], [])
 
 
@@ -49,10 +52,6 @@ def init_image(img):
 
 
 def init():
-    input_y = [len(PIXELS_TO_SCAN)]
-    hidden_y = [int(len(PIXELS_TO_SCAN) / 2), int(len(PIXELS_TO_SCAN) / 4)]
-    output_y = [len(Marble)]
-    layer = input_y + hidden_y + output_y
     if os.path.exists("network.fann"):
         print("Load Network from network.fann")
         # ANN.create_from_file("network.fann")
