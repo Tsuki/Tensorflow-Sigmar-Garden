@@ -13,13 +13,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from Marble import Marble
-from Parameters import batch_size
+from Parameters import batch_size, learning_rate, num_steps, display_step
 
 from State import State
 from utils import img_pos, edges_at, PIXELS_TO_SCAN, FIELD_POSITIONS
+from tensorflow.examples.tutorials.mnist import input_data
 
-n_hidden_1 = int(len(PIXELS_TO_SCAN) / 2)  # 1st layer number of neurons
-n_hidden_2 = int(len(PIXELS_TO_SCAN) / 4)  # 2nd layer number of neurons
+mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
+n_hidden_1 = int(len(PIXELS_TO_SCAN) / 3)  # 1st layer number of neurons
+n_hidden_2 = int(len(PIXELS_TO_SCAN) / 3)  # 2nd layer number of neurons
 num_input = len(PIXELS_TO_SCAN)  # MNIST data input (img shape: 28*28)
 num_classes = len(Marble)
 MARBLE_BY_SYMBOL = dict(zip([Marble.symbol(e) for e in Marble], [e.name for e in Marble]))
@@ -39,7 +41,7 @@ def sample():
             marble = MARBLE_BY_SYMBOL[symbol]
             edge_pixels = edges_at(img, *img_pos(*pos))
             image.append(edge_pixels)
-            label.append(marble)
+            label.append(Marble[marble].value)
             # TRAIN_CASES[marble] = TRAIN_CASES[marble] + [edge_pixels]
 
 
@@ -52,13 +54,57 @@ def train():
 
 def init_image(img):
     status = State()
-    print(image[0])
     for pos in FIELD_POSITIONS:
         try_edges = edges_at(img, *img_pos(*pos))
         # result = ANN.run(list(map(lambda x: 1.0 if x in try_edges else 0.0, PIXELS_TO_SCAN)))
         # marble = sorted(list(zip(result, [e.name for e in Marble])), reverse=True)[0]
         # status.state[pos] = Marble.symbol(Marble[marble[1]])
     print(status)
+
+
+def neural_net(x_dict):
+    # TF Estimator input is a dict, in case of multiple inputs
+    x = x_dict['images']
+    # Hidden fully connected layer with 256 neurons
+    layer_1 = tf.layers.dense(x, n_hidden_1)
+    # Hidden fully connected layer with 256 neurons
+    layer_2 = tf.layers.dense(layer_1, n_hidden_2)
+    # Output fully connected layer with a neuron for each class
+    out_layer = tf.layers.dense(layer_2, num_classes)
+    return out_layer
+
+
+def model_fn(features, labels, mode):
+    # Build the neural network
+    logits = neural_net(features)
+
+    # Predictions
+    pred_classes = tf.argmax(logits, axis=1)
+    pred_probas = tf.nn.softmax(logits)
+
+    # If prediction mode, early return
+    if mode == tf.estimator.ModeKeys.PREDICT:
+        return tf.estimator.EstimatorSpec(mode, predictions=pred_classes)
+
+        # Define loss and optimizer
+    loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
+        logits=logits, labels=tf.cast(labels, dtype=tf.int32)))
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+    train_op = optimizer.minimize(loss_op, global_step=tf.train.get_global_step())
+
+    # Evaluate the accuracy of the model
+    acc_op = tf.metrics.accuracy(labels=labels, predictions=pred_classes)
+
+    # TF Estimators requires to return a EstimatorSpec, that specify
+    # the different ops for training, evaluating, ...
+    estim_specs = tf.estimator.EstimatorSpec(
+        mode=mode,
+        predictions=pred_classes,
+        loss=loss_op,
+        train_op=train_op,
+        eval_metric_ops={'accuracy': acc_op})
+
+    return estim_specs
 
 
 def init():
@@ -69,12 +115,27 @@ def init():
         print("Train Network")
         sample()
         # print(image)
-        # print(label)
         input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={'images': image}, y=label, batch_size=batch_size, num_epochs=None, shuffle=True)
-        # ANN.create_standard_array(layer)
-        # train()
-        # ANN.save("network.fann")
+            x={'images': np.array(image)}, y=np.array(label), batch_size=batch_size, num_epochs=None, shuffle=True)
+        model = tf.estimator.Estimator(model_fn)
+        model.train(input_fn, steps=num_steps)
+        # Use the Estimator 'evaluate' method
+        model.evaluate(input_fn)
+
+        # n_images = 4
+        # # Get images from test set
+        # test_images = mnist.test.images[:n_images]
+        # # Prepare the input data
+        # input_fn = tf.estimator.inputs.numpy_input_fn(
+        #     x={'images': test_images}, shuffle=False)
+        # # Use the model to predict the images class
+        # preds = list(model.predict(input_fn))
+        #
+        # # Display
+        # for i in range(n_images):
+        #     plt.imshow(np.reshape(test_images[i], [28, 28]), cmap='gray')
+        #     plt.show()
+        #     print("Model prediction:", preds[i])
 
 
 def main():

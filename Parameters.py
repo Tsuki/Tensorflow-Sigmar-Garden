@@ -1,7 +1,7 @@
 
-learning_rate = 0.1
+learning_rate = 0.01
 num_steps = 1000
-batch_size = 128
+batch_size = 100
 display_step = 100
 
 FIELD_X = 1052

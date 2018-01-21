@@ -2,22 +2,22 @@ from enum import Enum
 
 
 class Marble(Enum):
-    none = -1
-    Salt = 0
-    Air = 1
-    Fire = 2
-    Water = 3
-    Earth = 4
-    Vitae = 5
-    Mors = 6
-    Quintessence = 7
-    Quicksilver = 8
-    Lead = 9
-    Tin = 10
-    Iron = 11
-    Copper = 12
-    Silver = 13
-    Gold = 14
+    none = 0
+    Salt = 1
+    Air = 2
+    Fire = 3
+    Water = 4
+    Earth = 5
+    Vitae = 6
+    Mors = 7
+    Quintessence = 8
+    Quicksilver = 9
+    Lead = 10
+    Tin = 11
+    Iron = 12
+    Copper = 13
+    Silver = 14
+    Gold = 15
 
     def symbol(self):
         if self.value is self.none.value:
