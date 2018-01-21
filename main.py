@@ -1,35 +1,30 @@
-import argparse
 import random
-from enum import Enum, auto
+from enum import Enum
 import os
 
 import itertools
-import pyautogui
-import pyscreenshot
-import time
 
 import sys
-from fann2 import libfann
 from PIL import Image
 
 
 class Marble(Enum):
     none = -1
     Salt = 0
-    Air = auto()
-    Fire = auto()
-    Water = auto()
-    Earth = auto()
-    Vitae = auto()
-    Mors = auto()
-    Quintessence = auto()
-    Quicksilver = auto()
-    Lead = auto()
-    Tin = auto()
-    Iron = auto()
-    Copper = auto()
-    Silver = auto()
-    Gold = auto()
+    Air = 1
+    Fire = 2
+    Water = 3
+    Earth = 4
+    Vitae = 5
+    Mors = 6
+    Quintessence = 7
+    Quicksilver = 8
+    Lead = 9
+    Tin = 10
+    Iron = 11
+    Copper = 12
+    Silver = 13
+    Gold = 14
 
     def symbol(self):
         if self.value is self.none.value:
@@ -91,7 +86,6 @@ def pixels_to_scan():
 
 FIELD_POSITIONS = field_positions()
 PIXELS_TO_SCAN = pixels_to_scan()
-ANN = libfann.neural_net()
 
 
 def img_pos(x, y):
@@ -134,21 +128,19 @@ def sample():
 
 
 def train():
-    for i in range(len(FIELD_POSITIONS * 15)):
         marble = random.choice([e.name for e in Marble])
         edge_pixels = random.choice(TRAIN_CASES[marble])
         a = list(map(lambda x: 1.0 if x in edge_pixels else 0.0, PIXELS_TO_SCAN))
         b = list(map(lambda x: 1.0 if marble is x else 0.0, [e.name for e in Marble]))
-        ANN.train(a, b)
 
 
 def initMap(img):
     status = State()
     for pos in FIELD_POSITIONS:
         try_edges = edges_at(img, *img_pos(*pos))
-        result = ANN.run(list(map(lambda x: 1.0 if x in try_edges else 0.0, PIXELS_TO_SCAN)))
-        marble = sorted(list(zip(result, [e.name for e in Marble])), reverse=True)[0]
-        status.state[pos] = Marble.symbol(Marble[marble[1]])
+        # result = ANN.run(list(map(lambda x: 1.0 if x in try_edges else 0.0, PIXELS_TO_SCAN)))
+        # marble = sorted(list(zip(result, [e.name for e in Marble])), reverse=True)[0]
+        # status.state[pos] = Marble.symbol(Marble[marble[1]])
     print(status)
 
 
@@ -159,11 +151,11 @@ def init():
     layer = input_y + hidden_y + output_y
     if os.path.exists("network.fann"):
         print("Load Network from network.fann")
-        ANN.create_from_file("network.fann")
+        # ANN.create_from_file("network.fann")
     else:
         print("Train Network")
         sample()
-        ANN.create_standard_array(layer)
+        # ANN.create_standard_array(layer)
         train()
         # ANN.save("network.fann")
 
