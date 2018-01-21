@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import random
 from enum import Enum
 import os
@@ -11,16 +13,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from Marble import Marble
+from Parameters import batch_size
 
 from State import State
 from utils import img_pos, edges_at, PIXELS_TO_SCAN, FIELD_POSITIONS
 
-n_hidden_1 = int(len(PIXELS_TO_SCAN) / 2) # 1st layer number of neurons
-n_hidden_2 = int(len(PIXELS_TO_SCAN) / 4) # 2nd layer number of neurons
-num_input = len(PIXELS_TO_SCAN) # MNIST data input (img shape: 28*28)
+n_hidden_1 = int(len(PIXELS_TO_SCAN) / 2)  # 1st layer number of neurons
+n_hidden_2 = int(len(PIXELS_TO_SCAN) / 4)  # 2nd layer number of neurons
+num_input = len(PIXELS_TO_SCAN)  # MNIST data input (img shape: 28*28)
 num_classes = len(Marble)
 MARBLE_BY_SYMBOL = dict(zip([Marble.symbol(e) for e in Marble], [e.name for e in Marble]))
 TRAIN_CASES = dict.fromkeys([e.name for e in Marble], [])
+image = []
+label = []
 
 
 def sample():
@@ -31,7 +36,9 @@ def sample():
         for j, (pos, symbol) in enumerate(zip(FIELD_POSITIONS, samples)):
             marble = MARBLE_BY_SYMBOL[symbol]
             edge_pixels = set(edges_at(img, *img_pos(*pos)))
-            TRAIN_CASES[marble] = TRAIN_CASES[marble] + [edge_pixels]
+            image.append(edge_pixels)
+            label.append(marble)
+            # TRAIN_CASES[marble] = TRAIN_CASES[marble] + [edge_pixels]
 
 
 def train():
@@ -58,8 +65,12 @@ def init():
     else:
         print("Train Network")
         sample()
+        print(image)
+        print(label)
+        input_fn = tf.estimator.inputs.numpy_input_fn(
+            x={'images': image}, y=label, batch_size=batch_size, num_epochs=None, shuffle=True)
         # ANN.create_standard_array(layer)
-        train()
+        # train()
         # ANN.save("network.fann")
 
 
