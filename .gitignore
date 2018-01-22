@@ -84,3 +84,4 @@ venv.bak/
 .ropeproject
 /site
 .mypy_cache/
+model.h5

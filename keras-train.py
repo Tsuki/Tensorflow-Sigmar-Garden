@@ -2,19 +2,12 @@
 from __future__ import print_function
 
 import numpy as np
-import pandas as pd
-import matplotlib
-import matplotlib.pyplot as plt
-import scipy
 from PIL import Image
 import os
 import itertools
 from enum import Enum
 
-learning_rate = 0.01
-num_steps = 2000
-batch_size = 100
-display_step = 100
+from keras.optimizers import RMSprop, SGD
 
 FIELD_X = 1052
 FIELD_DX = 66
@@ -110,15 +103,14 @@ x_train, y_train = load_mnist()
 x_test, y_test = load_mnist()
 
 import keras
-from keras.datasets import mnist
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Dense, Dropout, Flatten, Activation
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 
-batch_size = 128
+batch_size = 100
 num_classes = 16
-epochs = 12
+epochs = 100
 
 # input image dimensions
 img_rows, img_cols = 33, 33
@@ -126,20 +118,18 @@ img_rows, img_cols = 33, 33
 # the data, shuffled and split between train and test sets
 # (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-if K.image_data_format() == 'channels_first':
-    x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
-    x_test = x_test.reshape(x_test.shape[0], 1, img_rows, img_cols)
-    input_shape = (1, img_rows, img_cols)
-else:
-    x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols, 1)
-    x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, 1)
-    input_shape = (img_rows, img_cols, 1)
+# if K.image_data_format() == 'channels_first':
+#     x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
+#     x_test = x_test.reshape(x_test.shape[0], 1, img_rows, img_cols)
+#     input_shape = (1, img_rows, img_cols)
+# else:
+#     x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols, 1)
+#     x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, 1)
+#     input_shape = (img_rows, img_cols, 1)
 
 x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
-# x_train /= 255
-# x_test /= 255
-print('x_train shape:', x_train.shape)
+print('x_train shape:', x_train[0])
 print(x_train.shape[0], 'train samples')
 print(x_test.shape[0], 'test samples')
 
@@ -147,21 +137,22 @@ print(x_test.shape[0], 'test samples')
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
-model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3),
-                 activation='relu',
-                 input_shape=input_shape))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
-model.add(Flatten())
-model.add(Dense(128, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(num_classes, activation='softmax'))
+model = Sequential([
+    Dense(int(x_train.shape[0] / 3), input_dim=1089),
+    Activation('relu'),
+    Dense(int(x_train.shape[0] / 3)),
+    Activation('softmax'),
+    Dense(16),
+    Activation('softmax')
+])
+rmsprop = RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
 model.summary()
-model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.Adadelta(),
+model.compile(optimizer=rmsprop,
+              loss='categorical_crossentropy',
               metrics=['accuracy'])
+# model.compile(loss=keras.losses.categorical_crossentropy,
+#               optimizer=keras.optimizers.Adadelta(),
+#               metrics=['accuracy'])
 
 model.fit(x_train, y_train,
           batch_size=batch_size,
@@ -173,7 +164,6 @@ score = model.evaluate(x_test, y_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 model.save('model.h5')
-prediction = model.predict(x_test[0])
-print(prediction)
-print(y_test[0])
-
+# prediction = model.predict(x_train[0])
+# print(prediction)
+# print(y_test[0])

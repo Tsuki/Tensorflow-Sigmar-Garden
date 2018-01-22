@@ -17,9 +17,6 @@ from Parameters import batch_size, learning_rate, num_steps, display_step
 
 from State import State
 from utils import img_pos, edges_at, PIXELS_TO_SCAN, FIELD_POSITIONS
-from tensorflow.examples.tutorials.mnist import input_data
-
-mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
 n_hidden_1 = int(len(PIXELS_TO_SCAN) / 3)  # 1st layer number of neurons
 n_hidden_2 = int(len(PIXELS_TO_SCAN) / 3)  # 2nd layer number of neurons
 num_input = len(PIXELS_TO_SCAN)  # MNIST data input (img shape: 28*28)
@@ -133,10 +130,10 @@ def init():
 
         print("evaluate")
         # Use the Estimator 'evaluate' method
-        # model.evaluate(input_fn)
+        model.evaluate(input_fn)
 
         print("Saveing")
-        model.export_savedmodel(os.getcwd(), serving_input_receiver_fn)
+        # model.export_savedmodel(os.getcwd(), serving_input_receiver_fn)
         # n_images = 10
         # Get images from test set
         # test_images = image[:n_images]
