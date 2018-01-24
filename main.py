@@ -17,6 +17,7 @@ from Parameters import batch_size, learning_rate, num_steps, display_step
 
 from State import State
 from utils import img_pos, edges_at, PIXELS_TO_SCAN, FIELD_POSITIONS
+
 n_hidden_1 = int(len(PIXELS_TO_SCAN) / 3)  # 1st layer number of neurons
 n_hidden_2 = int(len(PIXELS_TO_SCAN) / 3)  # 2nd layer number of neurons
 num_input = len(PIXELS_TO_SCAN)  # MNIST data input (img shape: 28*28)
@@ -39,7 +40,8 @@ def sample():
             edge_pixels = edges_at(img, *img_pos(*pos))
             image.append(edge_pixels)
             label.append(Marble[marble].value)
-            # TRAIN_CASES[marble] = TRAIN_CASES[marble] + [edge_pixels]
+    return np.array(image), np.array(label)
+    # TRAIN_CASES[marble] = TRAIN_CASES[marble] + [edge_pixels]
 
 
 def train():
@@ -77,7 +79,7 @@ def model_fn(features, labels, mode):
 
     # Predictions
     pred_classes = tf.argmax(logits, axis=1)
-    pred_probas = tf.nn.softmax(logits)
+    # pred_probas = tf.nn.softmax(logits)
 
     # If prediction mode, early return
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -125,13 +127,14 @@ def init():
             x={'images': np.array(image)}, y=np.array(label), batch_size=batch_size, num_epochs=None, shuffle=True)
         print("Estimator")
         model = tf.estimator.Estimator(model_fn)
-        print("train")
+        print(model)
         model.train(input_fn, steps=num_steps)
-
+        predict = model.predict(image[0])
+        print(list(predict))
         print("evaluate")
         # Use the Estimator 'evaluate' method
-        model.evaluate(input_fn)
-
+        evaluate = model.evaluate(image, label)
+        print(evaluate)
         print("Saveing")
         # model.export_savedmodel(os.getcwd(), serving_input_receiver_fn)
         # n_images = 10
@@ -152,7 +155,7 @@ def init():
 
 def main():
     # print(Marble.symbol(Marble.Fire))
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.logging.set_verbosity(tf.logging.DEBUG)
     print()
     init()
     init_image(Image.open(os.path.join("sample", "1.png")).convert('LA'))
