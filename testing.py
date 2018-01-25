@@ -88,7 +88,6 @@ model.evaluate(input_fn)
 print(input_fn())
 
 
-# Save
 def serving_input_receiver_fn():
     serialized_tf_example = tf.placeholder(dtype=tf.string, shape=[None], name='input_tensors')
     receiver_tensors = {"predictor_inputs": serialized_tf_example}
@@ -97,6 +96,11 @@ def serving_input_receiver_fn():
     return tf.estimator.export.ServingInputReceiver(features, receiver_tensors)
 
 
+# from tensorflow.python.estimator.export import export
+# feature_spec = {'MY_FEATURE': tf.constant(2.0, shape=[1, 1])}
+# serving_input_fn = export.build_raw_serving_input_receiver_fn(input_fn)
+
+# model.export_savedmodel("export", serving_input_fn)
 model.export_savedmodel("export", serving_input_receiver_fn)
 # Predict single images
 n_images = 4
