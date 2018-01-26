@@ -85,3 +85,4 @@ venv.bak/
 /site
 .mypy_cache/
 model.h5
+mnist_training

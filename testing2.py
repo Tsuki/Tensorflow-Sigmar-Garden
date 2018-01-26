@@ -1,7 +1,5 @@
 import tensorflow as tf
 
-from tensorflow.examples.tutorials.mnist import input_data as mnist_data
-
 from tensorflow.contrib import slim
 
 from tensorflow.contrib.learn import ModeKeys
@@ -9,8 +7,9 @@ from tensorflow.contrib.learn import ModeKeys
 from tensorflow.contrib.learn import learn_runner
 
 # Show debugging output
+import main
 
-tf.logging.set_verbosity(tf.logging.DEBUG)
+tf.logging.set_verbosity(tf.logging.INFO)
 
 # Set default flags for the output directories
 
@@ -40,9 +39,9 @@ def run_experiment(argv=None):
 
         learning_rate=0.002,
 
-        n_classes=10,
+        n_classes=16,
 
-        train_steps=5000,
+        train_steps=1000,
 
         min_eval_frequency=100
 
@@ -94,15 +93,10 @@ def experiment_fn(run_config, params):
 
     # Setup data loaders
 
-    mnist = mnist_data.read_data_sets(FLAGS.data_dir, one_hot=False)
+    # mnist = mnist_data.read_data_sets(FLAGS.data_dir, one_hot=False)
+    train_input_fn, train_input_hook = get_train_inputs(batch_size=128)
 
-    train_input_fn, train_input_hook = get_train_inputs(
-
-        batch_size=128, mnist_data=mnist)
-
-    eval_input_fn, eval_input_hook = get_test_inputs(
-
-        batch_size=128, mnist_data=mnist)
+    eval_input_fn, eval_input_hook = get_test_inputs(batch_size=128)
 
     # Define the experiment
 
@@ -293,36 +287,16 @@ def architecture(inputs, is_training, scope='MnistConvNet'):
                 [slim.conv2d, slim.fully_connected],
 
                 weights_initializer=tf.contrib.layers.xavier_initializer()):
-            net = slim.conv2d(inputs, 20, [5, 5], padding='VALID',
-
-                              scope='conv1')
-
+            net = slim.conv2d(inputs, 20, [5, 5], padding='VALID', scope='conv1')
             net = slim.max_pool2d(net, 2, stride=2, scope='pool2')
-
-            net = slim.conv2d(net, 40, [5, 5], padding='VALID',
-
-                              scope='conv3')
-
+            net = slim.conv2d(net, 40, [5, 5], padding='VALID', scope='conv3')
             net = slim.max_pool2d(net, 2, stride=2, scope='pool4')
-
-            net = tf.reshape(net, [-1, 4 * 4 * 40])
-
+            net = tf.reshape(net, [-1, 5 * 5 * 40])
             net = slim.fully_connected(net, 256, scope='fn5')
-
-            net = slim.dropout(net, is_training=is_training,
-
-                               scope='dropout5')
-
+            net = slim.dropout(net, is_training=is_training, scope='dropout5')
             net = slim.fully_connected(net, 256, scope='fn6')
-
-            net = slim.dropout(net, is_training=is_training,
-
-                               scope='dropout6')
-
-            net = slim.fully_connected(net, 10, scope='output',
-
-                                       activation_fn=None)
-
+            net = slim.dropout(net, is_training=is_training, scope='dropout6')
+            net = slim.fully_connected(net, 16, scope='output', activation_fn=None)
         return net
 
 
@@ -344,7 +318,7 @@ class IteratorInitializerHook(tf.train.SessionRunHook):
 
 # Define the training inputs
 
-def get_train_inputs(batch_size, mnist_data):
+def get_train_inputs(batch_size):
     """Return the input function to get the training data.
 
     Args:
@@ -352,8 +326,6 @@ def get_train_inputs(batch_size, mnist_data):
         batch_size (int): Batch size of training iterator that is returned
 
                           by the input function.
-
-        mnist_data (Object): Object holding the loaded mnist data.
 
     Returns:
 
@@ -381,16 +353,16 @@ def get_train_inputs(batch_size, mnist_data):
         with tf.name_scope('Training_data'):
             # Get Mnist data
 
-            images = mnist_data.train.images.reshape([-1, 28, 28, 1])
+            images, labels = main.sample()
+            images = images.reshape([-1, 33, 33, 1])
 
-            labels = mnist_data.train.labels
+            # labels = mnist_data.train.labels
 
             # Define placeholders
 
             images_placeholder = tf.placeholder(
 
                 images.dtype, images.shape)
-
             labels_placeholder = tf.placeholder(
 
                 labels.dtype, labels.shape)
@@ -432,7 +404,7 @@ def get_train_inputs(batch_size, mnist_data):
     return train_inputs, iterator_initializer_hook
 
 
-def get_test_inputs(batch_size, mnist_data):
+def get_test_inputs(batch_size):
     """Return the input function to get the test data.
 
     Args:
@@ -440,8 +412,6 @@ def get_test_inputs(batch_size, mnist_data):
         batch_size (int): Batch size of training iterator that is returned
 
                           by the input function.
-
-        mnist_data (Object): Object holding the loaded mnist data.
 
     Returns:
 
@@ -469,9 +439,8 @@ def get_test_inputs(batch_size, mnist_data):
         with tf.name_scope('Test_data'):
             # Get Mnist data
 
-            images = mnist_data.test.images.reshape([-1, 28, 28, 1])
-
-            labels = mnist_data.test.labels
+            images, labels = main.sample()
+            images = images.reshape([-1, 33, 33, 1])
 
             # Define placeholders
 
