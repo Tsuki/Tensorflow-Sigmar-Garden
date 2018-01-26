@@ -1,13 +1,18 @@
+from __future__ import print_function
+
+import itertools
+import os
+
+import numpy as np
 import tensorflow as tf
-
+from PIL import Image
 from tensorflow.contrib import slim
-
 from tensorflow.contrib.learn import ModeKeys
-
 from tensorflow.contrib.learn import learn_runner
 
 # Show debugging output
-import main
+from Marble import Marble
+from utils import img_pos, edges_at, FIELD_POSITIONS
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -26,6 +31,26 @@ tf.app.flags.DEFINE_string(
     flag_name='data_dir', default_value='./mnist_data',
 
     docstring='Directory to download the data to.')
+
+image = []
+label = []
+
+MARBLE_BY_SYMBOL = dict(zip([Marble.symbol(e) for e in Marble], [e.name for e in Marble]))
+
+
+def sample():
+    for i in range(1, 7):
+        img = Image.open(os.path.join("sample", str(i) + ".png")).convert('LA')
+        samples = list(itertools.chain.from_iterable(
+            [lines.split() for lines in open(os.path.join("sample", str(i) + ".txt"), "r").readlines()]))
+        for j, (pos, symbol) in enumerate(zip(FIELD_POSITIONS, samples)):
+            marble = MARBLE_BY_SYMBOL[symbol]
+            edge_pixels = edges_at(img, *img_pos(*pos))
+            image.append(edge_pixels)
+            label.append(Marble[marble].value)
+    images = np.array(image).astype(np.float32)
+    labels = np.array(label).astype(np.int8)
+    return images, labels
 
 
 # Define and run experiment ###############################
@@ -353,7 +378,7 @@ def get_train_inputs(batch_size):
         with tf.name_scope('Training_data'):
             # Get Mnist data
 
-            images, labels = main.sample()
+            images, labels = sample()
             images = images.reshape([-1, 33, 33, 1])
 
             # labels = mnist_data.train.labels
@@ -439,7 +464,7 @@ def get_test_inputs(batch_size):
         with tf.name_scope('Test_data'):
             # Get Mnist data
 
-            images, labels = main.sample()
+            images, labels = sample()
             images = images.reshape([-1, 33, 33, 1])
 
             # Define placeholders
@@ -484,6 +509,34 @@ def get_test_inputs(batch_size):
 
 
 # Run script ##############################################
+_params = tf.contrib.training.HParams()  # Empty hyperparameters
+
+# Set the run_config where to load the model from
+
+_run_config = tf.contrib.learn.RunConfig()
+tf.app.flags.DEFINE_string(
+
+    flag_name='saved_model_dir', default_value='./mnist_training',
+
+    docstring='Output directory for model and training stats.')
+
+_run_config = _run_config.replace(model_dir=FLAGS.saved_model_dir)
+_estimator = get_estimator(_run_config, _params)
+
+
+def predict_img(_image):
+    def test_inputs():
+        with tf.name_scope('Test_data'):
+            images = tf.constant(_image, dtype=np.float32)
+
+            dataset = tf.contrib.data.Dataset.from_tensor_slices((images,))
+
+            # Return as iteration in batches of 1
+
+            return dataset.batch(1).make_one_shot_iterator().get_next()
+
+    return _estimator.predict(input_fn=test_inputs)
+
 
 if __name__ == "__main__":
     tf.app.run(main=run_experiment)
