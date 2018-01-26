@@ -40,7 +40,9 @@ def sample():
             edge_pixels = edges_at(img, *img_pos(*pos))
             image.append(edge_pixels)
             label.append(Marble[marble].value)
-    return np.array(image), np.array(label)
+    images = np.array(image).astype(np.float32)
+    labels = np.array(label).astype(np.int8)
+    return images, labels
     # TRAIN_CASES[marble] = TRAIN_CASES[marble] + [edge_pixels]
 
 
