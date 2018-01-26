@@ -19,12 +19,21 @@ def init_image(img):
         images[idx, :, :, 0] = np.array(edges_at(img, *img_pos(*pos))).reshape(33, 33)
         idx = idx + 1
     for i, value in enumerate(list(predict_img(images))):
+        if value == 0:
+            continue
         status.state[FIELD_POSITIONS[i]] = Marble.symbol(Marble(value))
     return status
 
 
 def main():
-    image = init_image(Image.open(os.path.join("sample", "1.png")).convert('LA'))
+    status = init_image(Image.open(os.path.join("sample", "1.png")).convert('LA'))
+    print(status)
+    print("neighbors")
+    print(status.neighbors(0, 0))
+    print("free")
+    print(status.free(1, 0))
+    print("frees")
+    print(status.frees())
     pass
 
 

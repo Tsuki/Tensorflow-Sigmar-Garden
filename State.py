@@ -1,7 +1,9 @@
 import sys
 
+import numpy as np
 from Parameters import FIELD_SIZE
 from utils import FIELD_POSITIONS
+from itertools import *
 
 
 class State:
@@ -12,9 +14,32 @@ class State:
         py = -1
         for (x, y) in FIELD_POSITIONS:
             if y != py:
-                if y > 0: sys.stdout.write('\n')
+                if y > 0:
+                    sys.stdout.write('\n')
                 sys.stdout.write(" " * abs(y - FIELD_SIZE + 1))
             sys.stdout.write(self.state.get((x, y), "-"))
             sys.stdout.write(' ')
             py = y
         return ''
+
+    def frees(self):
+        result = []
+        for (x, y) in self.state:
+            if self.free(x, y):
+                result.append((x, y))
+        return result
+
+    def free(self, x, y):
+        neg = repeat(self.neighbors(x, y), 2)
+        xs = np.hstack(neg)
+        return ('-', '-', '-') in list(zip(*(xs[i:] for i in range(3))))
+
+    def neighbors(self, x, y):
+        result = []
+        for (dx, dy) in [(0, -1), (1, 0), (1, 1), (0, 1), (-1, 0), (-1, -1)]:
+            n = (x + dx, y + dy)
+            if n in self.state:
+                result.append(self.state[n])
+            else:
+                result.append('-')
+        return result
