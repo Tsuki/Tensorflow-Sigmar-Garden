@@ -1,9 +1,13 @@
 import sys
+from itertools import *
 
 import numpy as np
+
+from Marble import Marble
 from Parameters import FIELD_SIZE
 from utils import FIELD_POSITIONS
-from itertools import *
+
+MARBLE_BY_SYMBOL = dict(zip([Marble.symbol(e) for e in Marble], [e.name for e in Marble]))
 
 
 class State:
@@ -43,3 +47,9 @@ class State:
             else:
                 result.append('-')
         return result
+
+    def step(self):
+        free = {}
+        frees = [(MARBLE_BY_SYMBOL[self.state[x]], x) for x in self.frees()]
+        for (k, v) in frees:
+            free.setdefault(k, []).append(v)

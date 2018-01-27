@@ -34,6 +34,8 @@ def main():
     print(status.free(1, 0))
     print("frees")
     print(status.frees())
+    print("step")
+    print(status.step())
     pass
 
 
