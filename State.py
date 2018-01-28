@@ -15,6 +15,11 @@ class State:
     state = dict()
     keyState = dict()
 
+    def update_key_dict(self):
+        for (k, v) in [(Marble[MARBLE_BY_SYMBOL[self.state[x]]], x) for x in self.state]:
+            self.keyState.setdefault(k, []).append(v)
+        # self.keyState = [(k, status.keyState[k]) for k in sorted(status.keyState.keys()) if k.value > 9]
+
     def __str__(self):
         py = -1
         for (x, y) in FIELD_POSITIONS:
@@ -49,13 +54,21 @@ class State:
                 result.append('-')
         return result
 
+    def score(self):
+        return len(self.state)
+
+    def solve(self):
+        todo = self.state
+        solutions = {str(todo): []}
+        # while len(todo) == 0:
+        #     continue
+
     def step(self):
         # for Quintessence use
         buckets = {}
         frees = sorted([(Marble[MARBLE_BY_SYMBOL[self.state[x]]], x) for x in self.frees()])
         for (k, v) in frees:
             buckets.setdefault(k, []).append(v)
-        print("frees")
         for a in frees:
             (marbleA, posA) = a
             for b in frees:
@@ -81,8 +94,3 @@ class State:
                     continue
                 else:
                     print(marbleA, marbleB)
-
-    def update_key_dict(self):
-        for (k, v) in [(Marble[MARBLE_BY_SYMBOL[self.state[x]]], x) for x in self.state]:
-            self.keyState.setdefault(k, []).append(v)
-        # self.keyState = [(k, status.keyState[k]) for k in sorted(status.keyState.keys()) if k.value > 9]

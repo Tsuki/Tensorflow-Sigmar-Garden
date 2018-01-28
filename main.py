@@ -28,6 +28,7 @@ def init_image(img):
 
 def main():
     status = init_image(Image.open(os.path.join("sample", "1.png")).convert('LA'))
+    status.solve()
     # print(status)
     # print("neighbors")
     # print(status.neighbors(0, 0))
