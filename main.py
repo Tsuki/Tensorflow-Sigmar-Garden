@@ -6,7 +6,7 @@ import numpy as np
 from PIL import Image
 
 from Marble import Marble
-from State import State
+from State import State, MARBLE_BY_SYMBOL
 from testing2 import predict_img
 from utils import img_pos, edges_at, FIELD_POSITIONS
 
@@ -22,20 +22,21 @@ def init_image(img):
         if value == 0:
             continue
         status.state[FIELD_POSITIONS[i]] = Marble.symbol(Marble(value))
+    status.update_key_dict()
     return status
 
 
 def main():
     status = init_image(Image.open(os.path.join("sample", "1.png")).convert('LA'))
-    print(status)
-    print("neighbors")
-    print(status.neighbors(0, 0))
-    print("free")
-    print(status.free(1, 0))
-    print("frees")
-    print(status.frees())
-    print("step")
-    print(status.step())
+    # print(status)
+    # print("neighbors")
+    # print(status.neighbors(0, 0))
+    # print("free")
+    # print(status.free(1, 0))
+    # print("frees")
+    # print(status.frees())
+    # print("step")
+    # print(status.step())
     pass
 
 

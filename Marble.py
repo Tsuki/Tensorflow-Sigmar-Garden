@@ -26,3 +26,9 @@ class Marble(Enum):
             return self.name[0].upper()
         else:
             return self.name[0].lower()
+
+    def previous(self):
+        return Marble(self.value - 1)
+
+    def __lt__(self, other):
+        return self.value < other.value

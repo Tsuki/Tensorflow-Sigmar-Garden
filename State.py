@@ -13,6 +13,7 @@ MARBLE_BY_SYMBOL = dict(zip([Marble.symbol(e) for e in Marble], [e.name for e in
 class State:
     # state = dict.fromkeys([e.name for e in Marble], ())
     state = dict()
+    keyState = dict()
 
     def __str__(self):
         py = -1
@@ -53,3 +54,8 @@ class State:
         frees = [(MARBLE_BY_SYMBOL[self.state[x]], x) for x in self.frees()]
         for (k, v) in frees:
             free.setdefault(k, []).append(v)
+
+    def update_key_dict(self):
+        for (k, v) in [(Marble[MARBLE_BY_SYMBOL[self.state[x]]], x) for x in self.state]:
+            self.keyState.setdefault(k, []).append(v)
+        # self.keyState = [(k, status.keyState[k]) for k in sorted(status.keyState.keys()) if k.value > 9]
