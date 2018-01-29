@@ -1,3 +1,4 @@
+import random
 import sys
 from copy import deepcopy, copy
 from itertools import *
@@ -14,16 +15,10 @@ MARBLE_BY_SYMBOL = dict(zip([Marble.symbol(e) for e in Marble], [e.name for e in
 class State:
     # state = dict.fromkeys([e.name for e in Marble], ())
     state = dict()
-    keyState = dict()
 
     def __init__(self, state=None):
         if state is not None:
             self.state = state
-
-    def update_key_dict(self):
-        for (k, v) in [(Marble[MARBLE_BY_SYMBOL[self.state[x]]], x) for x in self.state]:
-            self.keyState.setdefault(k, []).append(v)
-        # self.keyState = [(k, status.keyState[k]) for k in sorted(status.keyState.keys()) if k.value > 9]
 
     def __str__(self):
         py = -1
@@ -91,7 +86,7 @@ def solve(status):
     return None
 
 
-def step(self, keyState):
+def step(self):
     # for Quintessence use
     buckets = {}
     _frees = sorted([(Marble[MARBLE_BY_SYMBOL[self[x]]], x) for x in frees(self)])
@@ -110,7 +105,7 @@ def step(self, keyState):
                 if marbleB.value in range(Marble.Vitae.value, Marble.Mors.value + 1) and marbleA != marbleB:
                     yield {posA, posB}
             elif marbleA.value in range(Marble.Tin.value, Marble.Silver.value + 1):
-                if marbleB == Marble.Quicksilver and marbleA.previous() not in keyState:
+                if marbleB == Marble.Quicksilver and Marble.symbol(marbleA.previous()) not in self.values():
                     yield {posA, posB}
             elif marbleA == Marble.Lead and marbleB == Marble.Quicksilver:
                 yield {posA, posB}

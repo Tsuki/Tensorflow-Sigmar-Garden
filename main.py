@@ -22,7 +22,6 @@ def init_image(img):
         if value == 0:
             continue
         status.state[FIELD_POSITIONS[i]] = Marble.symbol(Marble(value))
-    status.update_key_dict()
     return status
 
 
@@ -37,7 +36,7 @@ def main():
     print("frees")
     print(frees(status.state))
     print("step")
-    print(list(step(status.state, status.keyState)))
+    print(list(step(status.state)))
     pass
 
 
