@@ -1,4 +1,5 @@
 import sys
+from copy import deepcopy, copy
 from itertools import *
 
 import numpy as np
@@ -14,6 +15,10 @@ class State:
     # state = dict.fromkeys([e.name for e in Marble], ())
     state = dict()
     keyState = dict()
+
+    def __init__(self, state=None):
+        if state is not None:
+            self.state = state
 
     def update_key_dict(self):
         for (k, v) in [(Marble[MARBLE_BY_SYMBOL[self.state[x]]], x) for x in self.state]:
@@ -62,11 +67,28 @@ def score(self):
     return len(self)
 
 
-# def solve(self):
-#     todo = self
-#     solutions = {str(todo): []}
-#     while len(todo) == 0:
-#         continue
+def solve(status):
+    todo = [status]
+    solutions = {str(status.state): []}
+    while len(solutions) > 0:
+        # eval
+        cur_state = sorted(todo, key=lambda x: len(x.state))[0]
+        todo.remove(cur_state)
+        for _step in step(cur_state.state, status.keyState):
+            state = deepcopy(cur_state.state)
+            for pos in _step:
+                if pos in state:
+                    state.pop(pos)
+                if str(state) in solutions:
+                    continue
+                todo += [State(state)]
+                solution = copy(solutions[str(cur_state.state)])
+                solution += _step
+                solutions[str(state)] = solution
+                if len(state) == 0:
+                    print(solutions)
+                    return solution
+    return None
 
 
 def step(self, keyState):
