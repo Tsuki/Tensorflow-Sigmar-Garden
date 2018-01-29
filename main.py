@@ -29,15 +29,15 @@ def init_image(img):
 def main():
     status = init_image(Image.open(os.path.join("sample", "1.png")).convert('LA'))
     # status.solve()
-    print(status)
+    print(status.state)
     print("neighbors")
-    print(neighbors(status, 0, 0))
+    print(neighbors(status.state, 0, 0))
     print("free")
-    print(free(status, 1, 0))
+    print(free(status.state, 1, 0))
     print("frees")
-    print(frees(status))
+    print(frees(status.state))
     print("step")
-    print(list(step(status)))
+    print(list(step(status.state, status.keyState)))
     pass
 
 

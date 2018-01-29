@@ -35,7 +35,7 @@ class State:
 
 def frees(self):
     result = []
-    for (x, y) in self.state:
+    for (x, y) in self:
         if free(self, x, y):
             result.append((x, y))
     return result
@@ -51,8 +51,8 @@ def neighbors(self, x, y):
     result = []
     for (dx, dy) in [(0, -1), (1, 0), (1, 1), (0, 1), (-1, 0), (-1, -1)]:
         n = (x + dx, y + dy)
-        if n in self.state:
-            result.append(self.state[n])
+        if n in self:
+            result.append(self[n])
         else:
             result.append('-')
     return result
@@ -69,10 +69,10 @@ def score(self):
 #         continue
 
 
-def step(self):
+def step(self, keyState):
     # for Quintessence use
     buckets = {}
-    _frees = sorted([(Marble[MARBLE_BY_SYMBOL[self.state[x]]], x) for x in frees(self)])
+    _frees = sorted([(Marble[MARBLE_BY_SYMBOL[self[x]]], x) for x in frees(self)])
     for (k, v) in _frees:
         buckets.setdefault(k, []).append(v)
     for a in _frees:
@@ -88,7 +88,7 @@ def step(self):
                 if marbleB.value in range(Marble.Vitae.value, Marble.Mors.value + 1) and marbleA != marbleB:
                     yield {posA, posB}
             elif marbleA.value in range(Marble.Tin.value, Marble.Silver.value + 1):
-                if marbleB == Marble.Quicksilver and marbleA.previous() not in self.keyState:
+                if marbleB == Marble.Quicksilver and marbleA.previous() not in keyState:
                     yield {posA, posB}
             elif marbleA == Marble.Lead and marbleB == Marble.Quicksilver:
                 yield {posA, posB}
