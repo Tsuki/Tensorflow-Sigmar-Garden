@@ -6,13 +6,13 @@ import numpy as np
 from PIL import Image
 
 from Marble import Marble
-from State import State, neighbors, free, step, frees
+from State import State, neighbors, free, step, frees, solve
 from testing2 import predict_img
 from utils import img_pos, edges_at, FIELD_POSITIONS
 
 
 def init_image(img):
-    status = State()
+    status = State(dict())
     images = np.zeros((len(FIELD_POSITIONS), 33, 33, 1))
     idx = 0
     for pos in FIELD_POSITIONS:
@@ -28,15 +28,16 @@ def init_image(img):
 def main():
     status = init_image(Image.open(os.path.join("sample", "1.png")).convert('LA'))
     # status.solve()
-    print(status.state)
-    print("neighbors")
-    print(neighbors(status.state, 0, 0))
-    print("free")
-    print(free(status.state, 1, 0))
-    print("frees")
-    print(frees(status.state))
+    # print(status.state)
+    # print("neighbors")
+    # print(neighbors(status.state, 0, 0))
+    # print("free")
+    # print(free(status.state, 1, 0))
+    # print("frees")
+    # print(frees(status.state))
     print("step")
     print(list(step(status.state)))
+    print(solve(status))
     pass
 
 

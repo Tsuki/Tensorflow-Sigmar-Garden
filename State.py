@@ -1,7 +1,7 @@
-import random
 import sys
-from copy import deepcopy, copy
+from copy import deepcopy
 from itertools import *
+from random import shuffle
 
 import numpy as np
 
@@ -16,9 +16,8 @@ class State:
     # state = dict.fromkeys([e.name for e in Marble], ())
     state = dict()
 
-    def __init__(self, state=None):
-        if state is not None:
-            self.state = state
+    def __init__(self, state):
+        self.state = state
 
     def __str__(self):
         py = -1
@@ -64,24 +63,25 @@ def score(self):
 
 def solve(status):
     todo = [status]
-    solutions = {str(status.state): []}
-    while len(solutions) > 0:
-        # eval
+    solutions = {status: []}
+    while len(todo) > 0:
         cur_state = sorted(todo, key=lambda x: len(x.state))[0]
+        solutions.update({cur_state: []})
         todo.remove(cur_state)
-        for _step in step(cur_state.state, status.keyState):
-            state = deepcopy(cur_state.state)
+        print((len(todo), len(cur_state.state)))
+        for _step in step(cur_state.state):
+            state = State(cur_state.state)
             for pos in _step:
-                if pos in state:
-                    state.pop(pos)
-                if str(state) in solutions:
+                if pos in state.state:
+                    state.state.pop(pos)
+                if state in solutions:
                     continue
-                todo += [State(state)]
-                solution = copy(solutions[str(cur_state.state)])
+                todo = todo + [deepcopy(state)]
+                solution = solutions[cur_state]
                 solution += _step
-                solutions[str(state)] = solution
-                if len(state) == 0:
-                    print(solutions)
+                solutions[cur_state] = solution
+                if len(state.state) == 0:
+                    print(solution)
                     return solution
     return None
 
@@ -92,6 +92,7 @@ def step(self):
     _frees = sorted([(Marble[MARBLE_BY_SYMBOL[self[x]]], x) for x in frees(self)])
     for (k, v) in _frees:
         buckets.setdefault(k, []).append(v)
+    shuffle(_frees)
     for a in _frees:
         (marbleA, posA) = a
         for b in _frees:
@@ -117,3 +118,4 @@ def step(self):
                 continue
             else:
                 print(marbleA, marbleB)
+                continue
