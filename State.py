@@ -62,13 +62,16 @@ def score(self):
 
 
 def solve(status):
+    # https://stackoverflow.com/questions/9001509/how-can-i-sort-a-dictionary-by-key
+    # collections.OrderedDict(sorted(d.items()))
     todo = [status]
     solutions = {status: []}
     while len(todo) > 0:
+        # increase to fast
         cur_state = sorted(todo, key=lambda x: len(x.state))[0]
         solutions.update({cur_state: []})
         todo.remove(cur_state)
-        print((len(todo), len(cur_state.state)))
+        # print((len(todo), len(cur_state.state)))
         for _step in step(cur_state.state):
             state = State(cur_state.state)
             for pos in _step:
@@ -80,6 +83,8 @@ def solve(status):
                 solution = solutions[cur_state]
                 solution += _step
                 solutions[cur_state] = solution
+                if len(state.state) == 1:
+                    print(state)
                 if len(state.state) == 0:
                     print(solution)
                     return solution
@@ -90,32 +95,35 @@ def step(self):
     # for Quintessence use
     buckets = {}
     _frees = sorted([(Marble[MARBLE_BY_SYMBOL[self[x]]], x) for x in frees(self)])
+    shuffle(_frees)
     for (k, v) in _frees:
         buckets.setdefault(k, []).append(v)
-    shuffle(_frees)
     for a in _frees:
         (marbleA, posA) = a
         for b in _frees:
             (marbleB, posB) = b
             if a == b:
                 continue
-            elif marbleA.value in range(Marble.Salt.value, Marble.Earth.value + 1):
-                if marbleB == marbleA or marbleB == Marble.Salt:
-                    yield {posA, posB}
             elif marbleA.value in range(Marble.Vitae.value, Marble.Mors.value + 1):
                 if marbleB.value in range(Marble.Vitae.value, Marble.Mors.value + 1) and marbleA != marbleB:
                     yield {posA, posB}
-            elif marbleA.value in range(Marble.Tin.value, Marble.Silver.value + 1):
-                if marbleB == Marble.Quicksilver and Marble.symbol(marbleA.previous()) not in self.values():
+
+            elif marbleA.value in range(Marble.Lead.value, Marble.Silver.value + 1):
+                if marbleA == Marble.Gold:
+                    yield {posA}
+                #  break if state.each_value.any? { |m| (Marble::Lead...ma) === m }
+                elif marbleB == Marble.Quicksilver and Marble.symbol(marbleA.previous()) not in self.values():
                     yield {posA, posB}
-            elif marbleA == Marble.Lead and marbleB == Marble.Quicksilver:
-                yield {posA, posB}
-            elif marbleA == Marble.Gold:
-                yield {posA}
+
+            elif marbleA.value in range(Marble.Salt.value, Marble.Earth.value + 1):
+                if marbleB == marbleA or marbleB == Marble.Salt:
+                    yield {posA, posB}
+
             elif marbleA == Marble.Quintessence:
                 continue
-            elif marbleA == Marble.Quicksilver:
-                continue
-            else:
-                print(marbleA, marbleB)
-                continue
+
+            # elif marbleA == Marble.Quicksilver:
+            #     continue
+            # else:
+            #     print(marbleA, marbleB)
+            #     continue
