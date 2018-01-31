@@ -71,8 +71,11 @@ def solve(status):
         cur_state = sorted(todo, key=lambda x: len(x.state))[0]
         solutions.update({cur_state: []})
         todo.remove(cur_state)
-        # print((len(todo), len(cur_state.state)))
+        print((len(todo), len(cur_state.state)))
+        print(cur_state)
         for _step in step(cur_state.state):
+            print("_step")
+            print(_step)
             state = State(cur_state.state)
             for pos in _step:
                 if pos in state.state:
@@ -108,11 +111,15 @@ def step(self):
                 if marbleB.value in range(Marble.Vitae.value, Marble.Mors.value + 1) and marbleA != marbleB:
                     yield {posA, posB}
 
-            elif marbleA.value in range(Marble.Lead.value, Marble.Silver.value + 1):
+            elif marbleA.value in range(Marble.Tin.value, Marble.Gold.value + 1):
                 if marbleA == Marble.Gold:
                     yield {posA}
                 #  break if state.each_value.any? { |m| (Marble::Lead...ma) === m }
                 elif marbleB == Marble.Quicksilver and Marble.symbol(marbleA.previous()) not in self.values():
+                    yield {posA, posB}
+
+            elif marbleA.value == Marble.Lead:
+                if marbleB == Marble.Quicksilver:
                     yield {posA, posB}
 
             elif marbleA.value in range(Marble.Salt.value, Marble.Earth.value + 1):
